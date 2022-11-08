@@ -6,44 +6,39 @@ import PostList from './components/PostList';
 import { usePosts } from './hooks/usePosts';
 import MyButton from './UI/button/MyButton';
 import MyModal from './UI/MyModal/MyModal';
-import axios from 'axios';
-
-
+import PostService from "./API/PostService";
+import Loader from "./UI/Loader/Loader";
+import {useFatching} from "./hooks/useFatching";
 
 
 function App() {
 
-  const [posts, setPosts] = useState([])
-  const [filter, setFilter] = useState({sort:'', query:''})
-  const [modal, setModal] = useState(true)
-  const sortedAndSorchedPosts = usePosts(posts, filter.sort, filter.query)
+  const [posts, setPosts] = useState([]);
+  const [filter, setFilter] = useState({sort:'', query:''});
+  const [modal, setModal] = useState(true);
+  const sortedAndSorchedPosts = usePosts(posts, filter.sort, filter.query);
+  const [fetchPosts, isPostsLoading, postError] = useFatching( async () => {
+      const posts = await PostService.getAll();
+      setPosts(posts)
+  })
 
-  useEffect(() => {
+    useEffect(() => {
     fetchPosts()
   }, [])
 
-const createPost = (newPost) => {
-  setPosts([...posts, newPost])
-  setModal(true)
-}
-//------дістаю масив даних по посиланню і записую за допомогою функції setPost 
-//      у масив даних для подальшої обробки
-
-
-async function fetchPosts() {
-    const response = await axios.get('https://jsonplaceholder.typicode.com/posts');
-    setPosts(response.data)
-}
+  function createPost(newPost) {
+    setPosts([...posts, newPost]);
+    setModal(true);
+  }
 
 const removePost = (post) => {
   setPosts(posts.filter(p => p.id !== post.id))
 }
 
-
-  return(
+ return(
     <div className="App">
       
-      <button onClick={fetchPosts}>GetPost</button>
+      
 
       <MyButton style={{marginTop: 30}} onClick={() => setModal(false)}>
         Create post
@@ -62,10 +57,16 @@ const removePost = (post) => {
         setFilter={setFilter}
       />
 
-      <PostList remove={removePost} posts={sortedAndSorchedPosts} title="postu pro js"/>     
-      
-      
-    </div>
+      {postError &&
+          <h1>Error 404</h1>
+      }
+
+      {isPostsLoading
+          ? <div style={{display:'flex', justifyContent:'center', marginTop:50}}> <Loader/> </div>
+          : <PostList remove={removePost} posts={sortedAndSorchedPosts} title="postu pro js"/>
+      }
+
+      </div>
   );
 }
 
