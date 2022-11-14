@@ -6,11 +6,13 @@ import PostList from '../components/PostList';
 import { usePosts } from '../hooks/usePosts';
 import MyButton from '../UI/button/MyButton';
 import MyModal from '../UI/MyModal/MyModal';
-import PostService from "../API/PostService";
+
 import Loader from "../UI/Loader/Loader";
-import {useFatching} from "../hooks/useFatching";
+import {useFetching} from "../hooks/useFetching";
 import {getPageCount} from "../UI/utils/pages";
 import Pagination from "../UI/Pagination/Pagination";
+import PostService from "../API/PostService.jsx";
+
 
 
 function Posts() {
@@ -26,11 +28,12 @@ function Posts() {
 
 
 
-    const [fetchPosts, isPostsLoading, postError] = useFatching( async () => {
+    const [fetchPosts, isPostsLoading, postError] = useFetching( async () => {
         const response = await PostService.getAll(limit, page);
         setPosts(response.data)
         const totalCount = response.headers['x-total-count']
         setTotalPages(getPageCount(totalCount, limit));
+
     })
 
     useEffect(() => {

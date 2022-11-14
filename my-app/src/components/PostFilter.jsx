@@ -2,7 +2,8 @@ import React from "react";
 import MyInput from '../UI/input/MyInput';
 import MySelect from '../UI/MySelect/MySelect';
 
-const PostFilter = ({filter, setFilter}) => {
+
+const PostFilter = ({filter, setFilter, setLimit}) => {
     return(
         <div>
             <MyInput
@@ -20,6 +21,7 @@ const PostFilter = ({filter, setFilter}) => {
                     {value:'body', name:'for content'},
                 ]}
             />
+
         </div>
         
     );

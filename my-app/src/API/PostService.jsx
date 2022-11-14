@@ -1,4 +1,3 @@
-import React from "react";
 import axios from "axios";
 
 export default class PostService{
@@ -10,5 +9,15 @@ export default class PostService{
                 }
             });
             return response;
+    }
+
+    static async getById(id) {
+        const responseId = await axios.get(`https://jsonplaceholder.typicode.com/posts/` + id);
+        return responseId;
+    }
+
+    static async getCommentsById(id) {
+        const responseCommId = await axios.get(`https://jsonplaceholder.typicode.com/posts/${id}/comments/`);
+        return responseCommId;
     }
 }
