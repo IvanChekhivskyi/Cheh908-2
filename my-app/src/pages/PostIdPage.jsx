@@ -3,10 +3,13 @@ import {useParams} from "react-router-dom";
 import {useFetching} from "../hooks/useFetching";
 import PostService from "../API/PostService";
 import Loader from "../UI/Loader/Loader";
+import Comments from "./Comments";
+import MyButton from "../UI/button/MyButton";
 
 
 
 const PostIdPage = () => {
+
    const params = useParams()
    const id = params.id;
 
@@ -16,37 +19,44 @@ const PostIdPage = () => {
        setPost(response.data);
    })
 
-   const [comments, setComments] = useState({});
-   const [fetchCommentsById, isLoadingComments, errorComments] = useFetching(async () => {
-       const response = await PostService.getCommentsById(id);
-       setComments(response.data);
-   })
 
-     useEffect(() => {
+    const [visible, setVisible]= useState(false);
+    const OpenComments = () =>{
+        if(!visible){
+            setVisible(true);
+        } else setVisible(false);
+        return setVisible;
+    }
+
+    useEffect(() => {
         fetchPostById(params.id)
-        fetchCommentsById(params.id)
     }, [])
 
-    return (
+return (
         <div>
-            <h1>Post {params.id}</h1>
-            {isLoading
-                ? <Loader/>
-                : <div>{post.id}. {post.title}</div>
-            }
+            <div>
+                <h1>Post {params.id}</h1>
+                {isLoading
+                    ? <Loader/>
+                    : <div>{post.id}. {post.title}</div>
+                }
+            </div>
+            <div>
+                <h2>Comments</h2>
 
-            {isLoadingComments
-                ? <Loader/>
-                :   <div>
-                    {comments.map(comm =>
-                        <div style={{marginTop: 15}}>
-                            1<h3>{comm.email}</h3>
-                            <div>{comm.body}</div>
-                        </div>
-                    )}
+                {visible
+                    ? <div>
+                        <MyButton onClick={OpenComments}>Close comments</MyButton>
+                        <Comments/>
+                        <MyButton onClick={OpenComments}>Close comments</MyButton>
+                    </div>
 
-                </div>
-            }
+                    : <div>
+                        <MyButton onClick={OpenComments}>Open comments</MyButton>
+                    </div>
+                }
+            </div>
+
         </div>
     );
 };

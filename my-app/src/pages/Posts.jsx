@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import '../App.css';
 import PostFilter from '../components/PostFilter';
 import PostForm from '../components/PostForm';
@@ -12,6 +12,8 @@ import {useFetching} from "../hooks/useFetching";
 import {getPageCount} from "../UI/utils/pages";
 import Pagination from "../UI/Pagination/Pagination";
 import PostService from "../API/PostService.jsx";
+import {useOserver} from "../hooks/useOserver";
+import MySelect from "../UI/MySelect/MySelect";
 
 
 
@@ -24,21 +26,22 @@ function Posts() {
     const [totalPages, setTotalPages] = useState(0);
     const [limit, setLimit] = useState(10);
     const [page, setPage] = useState(1);
-
-
-
+    const lastElements = useRef();
 
     const [fetchPosts, isPostsLoading, postError] = useFetching( async () => {
         const response = await PostService.getAll(limit, page);
-        setPosts(response.data)
+        setPosts([...posts, ...response.data]);
         const totalCount = response.headers['x-total-count']
         setTotalPages(getPageCount(totalCount, limit));
-
     })
 
+useOserver(lastElements, 0, page<totalPages, isPostsLoading, () => {setPage(page+1)});
+
+
     useEffect(() => {
-        fetchPosts()
-    }, [page])
+        fetchPosts();
+
+    }, [page, limit])
 
     function createPost(newPost) {
         setPosts([...posts, newPost]);
@@ -75,12 +78,27 @@ function Posts() {
                 <h1>Error 404</h1>
             }
 
-            {isPostsLoading
-                ? <div style={{display:'flex', justifyContent:'center', marginTop:50}}> <Loader/> </div>
-                : <PostList remove={removePost} posts={sortedAndSorchedPosts} title="postu pro js"/>
-            }
+            <MySelect
+                value={limit}
+                defaultValue={"number of posts"}
+                onChange={(value) => setLimit(value)}
+                option={[
+                    {value: 5,    name: 5},
+                    {value: 10,    name: 10},
+                    {value: 25,    name: 25},
+                    {value: 50,    name: 50},
+                    {value: -1,    name: "oll"},
+                ]}
+            />
 
-            <Pagination totalPages={totalPages} page={page} setPage={setPage}/>
+            {isPostsLoading &&
+
+                     <div style={{display:'flex', justifyContent:'center', marginTop:50}}> <Loader/> </div>
+            }
+                <PostList remove={removePost} posts={sortedAndSorchedPosts} title="postu pro js"/>
+                <div ref={lastElements} style={{height: 15, background: "grey"}}/>
+
+                <Pagination totalPages={totalPages} page={page} setPage={setPage}/>
 
         </div>
     );
